@@ -135,13 +135,24 @@ function start(){
   });
 
   /* --- reveal построчно --- */
-  $$('[data-reveal-lines]').forEach(el => {
-    const lines = splitLines(el);
-    gsap.to(lines, {
-      y: '0%', duration: .9, stagger: .09, ease: 'expo.out',
-      scrollTrigger: { trigger: el, start: 'top 86%', once: true }
+  /* Нарезать строки можно только после загрузки шрифта. Запасным
+     шрифтом текст уже, в строку влезает больше слов — а готовая строка
+     склеивается в один inline-block и переносить её уже нельзя. Когда
+     приходил настоящий шрифт, такая строка оказывалась шире колонки и
+     тянула горизонтальную прокрутку всей страницы (на 320px заголовок
+     отзывов давал 330px при контейнере 288px). */
+  const splitAll = () => {
+    $$('[data-reveal-lines]').forEach(el => {
+      const lines = splitLines(el);
+      gsap.to(lines, {
+        y: '0%', duration: .9, stagger: .09, ease: 'expo.out',
+        scrollTrigger: { trigger: el, start: 'top 86%', once: true }
+      });
     });
-  });
+    if (window.ScrollTrigger) ScrollTrigger.refresh();
+  };
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(splitAll);
+  else splitAll();
 
   /* --- счётчики --- */
   $$('[data-count]').forEach(el => {

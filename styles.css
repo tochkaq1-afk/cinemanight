@@ -753,8 +753,11 @@ body.cursor-hot .cursor__ring{ width:62px; height:62px; border-color:var(--acid)
    АНИМАЦИИ — исходные состояния
    ========================================================= */
 [data-reveal]{ opacity:0; transform:translateY(26px); }
+[data-reveal-lines]{ min-width:0; }
 [data-reveal-lines] .rl-line{ display:block; overflow:hidden; }
-[data-reveal-lines] .rl-line > span{ display:inline-block; transform:translateY(105%); }
+/* max-width — страховка: если строка всё же окажется шире колонки,
+   она перенесётся внутри себя, а не вытолкнет страницу вбок */
+[data-reveal-lines] .rl-line > span{ display:inline-block; max-width:100%; transform:translateY(105%); }
 .is-ready [data-reveal]{ transition:none; }
 
 /* =========================================================
@@ -828,7 +831,29 @@ body.cursor-hot .cursor__ring{ width:62px; height:62px; border-color:var(--acid)
   .gslide--intro,.gslide--outro{ width:78vw; }
   .btn{ width:100%; }
   .hero__cta .btn{ width:auto; flex:1 1 auto; }
-}
+
+  /* Заголовок упирался в нижний предел clamp: 15vw на телефоне меньше
+     64px, поэтому на всех экранах стояли ровно 64px — при том, что по
+     ширине помещается вдвое больше. Незанятая высота уходила в разрыв
+     под линейкой (.hero__top тянет margin-bottom:auto и растягивает
+     весь запас экрана в одну дыру). Крупные буквы этот запас забирают. */
+  .hero__title{
+    /* 24vw давало на 320px переполнение в 27px: побуквенные inline-block
+       спаны считаются шире, чем сплошная строка. 22vw укладывается везде. */
+    font-size:min(22vw, 132px);
+    /* .86 сводило залитое «КИНО» и контурную «НОЧЬ» вплотную — на
+       телефоне строки читались как одна слипшаяся надпись */
+    line-height:.95;
+  }
+  /* обводка растёт вместе с кеглем, иначе на крупных буквах она тончает */
+  .hero__title .line--out{ -webkit-text-stroke-width:2.2px; }
+
+  /* Остаток высоты раньше уходил в один разрыв под линейкой: .hero__top
+     тянул margin-bottom:auto, и весь свободный экран собирался в одну
+     дыру. Теперь запас делится на два ровных промежутка — это читается
+     как воздух, а не как пропущенный блок. */
+  .hero{ justify-content:space-between; }
+  .hero__top{ margin-bottom:0; }
 
 /* ---------- цели касания не меньше 44px ---------- */
 @media (pointer:coarse), (max-width:900px){
@@ -864,6 +889,21 @@ body.cursor-hot .cursor__ring{ width:62px; height:62px; border-color:var(--acid)
   .nav__right{ gap:8px; }
   .nav__right .btn--sm{ padding:0 13px; letter-spacing:.08em; }
   .burger{ flex:none; }
+}
+
+@media (max-width:400px){
+  /* На 320px запаса из блока выше не хватало: логотип, кнопка и бургер
+     в сумме давали 347px при экране 320, и вся страница получала
+     горизонтальную прокрутку — тянуло именно шапку, а не заголовок. */
+  .nav{ gap:8px; }
+  .nav__logo{ font-size:13px; min-width:0; }
+  .nav__right{ gap:6px; min-width:0; }
+  .nav__right .btn--sm{ padding:0 10px; font-size:10px; letter-spacing:.04em; }
+
+  /* Метка с адресом стоит white-space:nowrap, а на ≤600px я поднял ей
+     кегль до 12px ради читаемости — одной строкой она стала шире экрана.
+     На узком телефоне разрешаем перенос. */
+  .hero__top .tag{ white-space:normal; letter-spacing:.10em; }
 }
 
 @media (max-width:600px){
