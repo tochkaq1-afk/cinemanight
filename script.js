@@ -242,18 +242,21 @@ function start(){
   });
 
   /* --- шапка: фон при скролле + скрытие вниз --- */
+  /* Ведём на обычном событии прокрутки, а не через тикер ScrollTrigger.
+     На iOS Safari во время инерционной прокрутки его колбэк приходит с
+     опозданием, и шапка на телефоне не уезжала — при том, что в Chrome
+     всё работало. Событие scroll там приходит исправно. */
   let last = window.scrollY;
-  ScrollTrigger.create({
-    start: 'top -60',
-    onUpdate: () => {
-      const y = window.scrollY;
-      nav.classList.toggle('is-stuck', y > 40);
-      if (!$('#menu').classList.contains('is-open')){
-        nav.classList.toggle('is-hidden', y > last && y > 400);
-      }
-      last = y;
+  const navScroll = () => {
+    const y = window.scrollY;
+    nav.classList.toggle('is-stuck', y > 40);
+    if (!$('#menu').classList.contains('is-open')){
+      nav.classList.toggle('is-hidden', y > last && y > 400);
     }
-  });
+    last = y;
+  };
+  addEventListener('scroll', navScroll, { passive: true });
+  navScroll();
 
   /* --- активная ссылка в меню --- */
   const ids = ['about', 'gallery', 'occasions', 'pricing', 'faq'];
